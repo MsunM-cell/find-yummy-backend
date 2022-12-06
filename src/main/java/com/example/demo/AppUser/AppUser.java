@@ -31,7 +31,8 @@ public class AppUser {
     private Long id; // 用户标识
     @Column(
             name = "username",
-            nullable = false
+            nullable = false,
+            unique = true
     )
     private String username; // 用户名
     @Column(
@@ -45,15 +46,18 @@ public class AppUser {
     )
     private Integer userType; // 用户类型（0普通用户、1系统管理员）
     @Column(
-            name = "real_name"
+            name = "real_name",
+            nullable = false
     )
     private String realName; // 用户姓名
     @Column(
-            name = "id_card_type"
+            name = "id_card_type",
+            nullable = false
     )
     private Integer idCardType; // 证件类型
     @Column(
-            name = "id_num"
+            name = "id_num",
+            nullable = false
     )
     private String idNum; // 证件号码
     @Column(
@@ -84,4 +88,19 @@ public class AppUser {
             nullable = false
     )
     private LocalDateTime modifyTime; // 修改时间
+
+    public AppUser(String username, String password, Integer userType, String realName,
+                   Integer idCardType, String idNum, String city) {
+        this.username = username;
+        this.password = password;
+        this.userType = userType;
+        this.realName = realName;
+        this.idCardType = idCardType;
+        this.idNum = idNum;
+        this.city = city;
+    }
+
+    public AppUser() {
+
+    }
 }
