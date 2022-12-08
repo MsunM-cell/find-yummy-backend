@@ -58,4 +58,17 @@ public class TasteResponse {
             nullable = false
     )
     private Integer state; // 状态（0待接受，1同意，2拒绝，3取消）
+
+    public TasteResponse(Long requestId, Long responseUserId, String detail, LocalDateTime createTime, LocalDateTime modifyTime, Integer state) {
+        this.requestId = requestId;
+        this.responseUserId = responseUserId;
+        this.detail = detail;
+        this.createTime = createTime;
+        this.modifyTime = modifyTime;
+        this.state = state;
+    }
+
+    public TasteResponse() {
+
+    }
 }
