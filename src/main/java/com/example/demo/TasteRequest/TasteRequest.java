@@ -1,9 +1,7 @@
 package com.example.demo.TasteRequest;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -11,6 +9,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @ToString
+@NoArgsConstructor
 @Entity
 @Table
 public class TasteRequest {
@@ -78,21 +77,21 @@ public class TasteRequest {
             name = "state",
             nullable = false
     )
-    private Integer state; // 状态（已完成、待响应、已取消、到期未达成）
+    private Integer state; // 状态（3已完成、0待响应、1已取消、2到期未达成）
+
+    public TasteRequest(Long userId,
+                        String tasteType,
+                        String name,
+                        String detail,
+                        Double maxPrice,
+                        LocalDate endTime,
+                        String imageUrl) {
+        this.userId = userId;
+        this.tasteType = tasteType;
+        this.name = name;
+        this.detail = detail;
+        this.maxPrice = maxPrice;
+        this.endTime = endTime;
+        this.imageUrl = imageUrl;
+    }
 }
-
-
-//    CREATE TABLE TasteRequest (
-//        id bigint,
-//        userId bigint not null,
-//        tasteType varchar(50) not null,
-//        name varchar(50) not null,
-//        detail varchar(255) DEFAULT null,
-//        maxPrice double not null,
-//        endTime date not null,
-//        img blob DEFAULT null,
-//        createTime date not null,
-//        modifyTime date not null,
-//        state int not null,
-//        PRIMARY KEY (id)
-//        ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4
