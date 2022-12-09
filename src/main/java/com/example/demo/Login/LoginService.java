@@ -12,12 +12,13 @@ public class LoginService {
     private AppUserService appUserService;
 
     public JSONObject login(JSONObject requestBody) {
-        Long id = appUserService.findAppUser(
+        JSONObject info = appUserService.findAppUser(
                 requestBody.get("username").toString(),
                 requestBody.get("password").toString()
         );
 
         JSONObject response = new JSONObject();
+        Long id = Long.parseLong(info.getString("id"));
         if (id == -1) {
             response.put("code", -1);
             response.put("msg", "用户名不存在！");
@@ -28,6 +29,7 @@ public class LoginService {
             response.put("code", 200);
             response.put("msg", "success");
             response.put("id", id);
+            response.put("type", Integer.parseInt(info.getString("type")));
         }
 
         return response;

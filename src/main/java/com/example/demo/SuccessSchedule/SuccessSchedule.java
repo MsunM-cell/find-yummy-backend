@@ -1,15 +1,15 @@
 package com.example.demo.SuccessSchedule;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Getter
 @Setter
 @ToString
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table
 @IdClass(SuccessSchedulePrimaryKey.class)
@@ -21,6 +21,12 @@ public class SuccessSchedule {
             updatable = false
     )
     private Long requestId; // 请求标识
+    @Id
+    @Column(
+            name = "response_id",
+            updatable = false
+    )
+    private Long responseId; // 响应标识
     @Id
     @Column(
             name = "request_user_id",

@@ -1,5 +1,6 @@
 package com.example.demo.AppUser;
 
+import com.alibaba.fastjson.JSONObject;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,27 +33,45 @@ public class AppUserService {
         return appUser.getId();
     }
 
-    public Long findAppUser(String username, String password) {
+    public JSONObject findAppUser(String username, String password) {
+        JSONObject info = new JSONObject();
+
         Optional<AppUser> appUserOptional = appUserRepository.findAppUserByUsername(username);
         if (appUserOptional.isEmpty()) {
             // 用户名不存在，返回-1
-            return -1L;
+            info.put("id", -1L);
+            return info;
         }
         String password_md5 = DigestUtils.md5DigestAsHex(password.getBytes(StandardCharsets.UTF_8));
         if (!Objects.equals(appUserOptional.get().getPassword(), password_md5)) {
             // 密码错误，返回-2
-            return -2L;
+            info.put("id", -2L);
+            return info;
         }
-        return appUserOptional.get().getId();
+
+        info.put("id", appUserOptional.get().getId());
+        info.put("type", appUserOptional.get().getUserType());
+
+        return info;
     }
 
     @Transactional
     public void updateAppUser(Long id, String password, String phone, String detail) {
         AppUser appUser = appUserRepository.findAppUserById(id).get();
-        String password_md5 = DigestUtils.md5DigestAsHex(password.getBytes(StandardCharsets.UTF_8));
-        appUser.setPassword(password_md5);
-        appUser.setPhoneNum(phone);
-        appUser.setDetail(detail);
+        if (password != null) {
+            String password_md5 = DigestUtils.md5DigestAsHex(password.getBytes(StandardCharsets.UTF_8));
+            appUser.setPassword(password_md5);
+        }
+        if (phone != null) {
+            appUser.setPhone(phone);
+        }
+        if (detail != null) {
+            appUser.setDetail(detail);
+        }
         appUser.setModifyTime(LocalDateTime.now());
+    }
+
+    public AppUser getUserById(Long userId) {
+        return appUserRepository.findAppUserById(userId).get();
     }
 }

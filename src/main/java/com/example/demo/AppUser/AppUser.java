@@ -56,14 +56,14 @@ public class AppUser {
     )
     private Integer idCardType; // 证件类型
     @Column(
-            name = "id_num",
+            name = "id_card_num",
             nullable = false
     )
-    private String idNum; // 证件号码
+    private String idCardNum; // 证件号码
     @Column(
-            name = "phone_num"
+            name = "phone"
     )
-    private String phoneNum; // 手机号码（11位数字）
+    private String phone; // 手机号码（11位数字）
     @Column(
             name = "user_level",
             nullable = false
@@ -90,13 +90,13 @@ public class AppUser {
     private LocalDateTime modifyTime; // 修改时间
 
     public AppUser(String username, String password, Integer userType, String realName,
-                   Integer idCardType, String idNum, String city) {
+                   Integer idCardType, String idCardNum, String city) {
         this.username = username;
         this.password = password;
         this.userType = userType;
         this.realName = realName;
         this.idCardType = idCardType;
-        this.idNum = idNum;
+        this.idCardNum = idCardNum;
         this.city = city;
     }
 
