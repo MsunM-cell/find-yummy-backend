@@ -58,7 +58,8 @@ public class TasteResponseController {
     }
 
     @GetMapping(path = "{userId}")
-    public JSONObject getTasteResponsesByUserId(@PathVariable("userId") Long userId) {
-        return tasteResponseService.getTasteResponsesByUserId(userId);
+    public JSONObject getTasteResponsesByUserId(@PathVariable("userId") Long userId,
+                                                @RequestParam(name = "page") Integer page) {
+        return tasteResponseService.getTasteResponsesByUserId(userId, page);
     }
 }

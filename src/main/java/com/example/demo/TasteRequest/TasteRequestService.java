@@ -3,12 +3,16 @@ package com.example.demo.TasteRequest;
 import com.alibaba.fastjson.JSONObject;
 import com.example.demo.AppUser.AppUser;
 import com.example.demo.AppUser.AppUserRepository;
+import com.example.demo.InterRevenue.InterRevenue;
+import com.example.demo.InterRevenue.InterRevenueRepository;
 import com.example.demo.RequestsToResponses;
 import com.example.demo.SuccessSchedule.SuccessSchedule;
 import com.example.demo.SuccessSchedule.SuccessScheduleRepository;
 import com.example.demo.TasteResponse.TasteResponse;
 import com.example.demo.TasteResponse.TasteResponseRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,16 +21,17 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 @Service
 @AllArgsConstructor
 public class TasteRequestService {
 
+    private AppUserRepository appUserRepository;
     private TasteRequestRepository tasteRequestRepository;
     private TasteResponseRepository tasteResponseRepository;
     private SuccessScheduleRepository successScheduleRepository;
-    private AppUserRepository appUserRepository;
+    private InterRevenueRepository interRevenueRepository;
     private RequestsToResponses requestsToResponses;
 
     public Long addTasteRequest(JSONObject requestBody) {
@@ -87,22 +92,24 @@ public class TasteRequestService {
         return true;
     }
 
-    public JSONObject getTasteRequestsByUserId(Long userId) {
+    public JSONObject getTasteRequestsByUserId(Long userId, Integer page) {
         JSONObject response = new JSONObject();
         response.put("code", 200);
         response.put("msg", "success");
 
-        List<TasteRequest> tasteRequestsByUserId = tasteRequestRepository.findTasteRequestsByUserId(userId);
+        PageRequest pageRequest = PageRequest.of(page, 5);
+        List<TasteRequest> tasteRequestsByUserId = tasteRequestRepository.findTasteRequestsByUserId(userId, pageRequest);
         response.put("taste_requests", tasteRequestsByUserId);
 
         return response;
     }
 
-    public JSONObject getTasteRequestsByCity(String city) {
+    public JSONObject getTasteRequestsByCity(String city, Integer page) {
         List<AppUser> appUsers = appUserRepository.findAppUsersByCity(city);
         List<Long> userIds = appUsers.stream().map(AppUser::getId).toList();
 
-        List<TasteRequest> tasteRequests = tasteRequestRepository.findTasteRequestsByUserIdIn(userIds);
+        PageRequest pageRequest = PageRequest.of(page, 5);
+        List<TasteRequest> tasteRequests = tasteRequestRepository.findTasteRequestsByUserIdIn(userIds, pageRequest);
 
         JSONObject response = new JSONObject();
         response.put("code", 200);
@@ -155,7 +162,66 @@ public class TasteRequestService {
                     3.0,
                     1.0
             );
+
+            // 持久化存储中介收益汇总表
+            // 获取月份（YYYY-MM）
+            String month = String.valueOf(LocalDate.now().getYear())
+                    + "-" + String.valueOf(LocalDate.now().getMonthValue());
+            // 获取地域（省-市）
+            String city = appUserRepository.findAppUserById(request_user_id).get().getCity();
+            // 获取请求类型
+            String requestType = tasteRequest.getTasteType();
+            Optional<InterRevenue> optionalInterRevenue = interRevenueRepository.findInterRevenueByMonthAndAndCityAndAndRequestType(month, city, requestType);
+            if (optionalInterRevenue.isPresent()) {
+                InterRevenue interRevenue = optionalInterRevenue.get();
+                interRevenue.setSuccessCnt(interRevenue.getSuccessCnt() + 1);
+                interRevenue.setRevenue(interRevenue.getRevenue() + 4.0);
+            } else {
+                InterRevenue interRevenue = new InterRevenue(
+                        month,
+                        city,
+                        requestType,
+                        1,
+                        3.0 + 1.0
+                );
+                interRevenueRepository.save(interRevenue);
+            }
+
             successScheduleRepository.save(successSchedule);
         }
+    }
+
+    public JSONObject getAllTasteRequests(Integer page) {
+        PageRequest pageRequest = PageRequest.of(page, 5);
+        List<TasteRequest> tasteRequests = tasteRequestRepository.findAll(pageRequest).getContent();
+
+        JSONObject response = new JSONObject();
+        response.put("code", 200);
+        response.put("msg", "success");
+        response.put("taste_requests", tasteRequests);
+
+        return response;
+    }
+
+    public JSONObject getTasteRequestsByFuzzyName(String name, Integer page) {
+        PageRequest pageRequest = PageRequest.of(page, 5);
+        List<TasteRequest> tasteRequests = tasteRequestRepository.findTasteRequestsByFuzzyName("%" + name + "%", pageRequest);
+
+        JSONObject response = new JSONObject();
+        response.put("code", 200);
+        response.put("msg", "success");
+        response.put("taste_requests", tasteRequests);
+
+        return response;
+    }
+
+    public JSONObject getTest() {
+        PageRequest pageRequest = PageRequest.of(2, 2);
+        Page<TasteRequest> page = tasteRequestRepository.findAll(pageRequest);
+
+        JSONObject response = new JSONObject();
+        response.put("page", page.getContent());
+
+        return response;
     }
 }

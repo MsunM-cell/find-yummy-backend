@@ -7,8 +7,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
-@RequestMapping(path = "/users/")
+@RequestMapping(path = "/users")
 @AllArgsConstructor
 public class AppUserController {
 
@@ -25,6 +27,18 @@ public class AppUserController {
         JSONObject temp = response.getJSONObject("info");
         temp.remove("password");
         response.put("info", temp);
+
+        return response;
+    }
+
+    @GetMapping
+    public JSONObject getAllUsers() {
+        List<AppUser> appUsers = appUserService.getAllUsers();
+
+        JSONObject response = new JSONObject();
+        response.put("code", 200);
+        response.put("msg", "success");
+        response.put("users", appUsers);
 
         return response;
     }

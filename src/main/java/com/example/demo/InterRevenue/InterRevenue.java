@@ -1,18 +1,16 @@
 package com.example.demo.InterRevenue;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import jakarta.persistence.*;
+import lombok.*;
 
 @Getter
 @Setter
 @ToString
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table
+@IdClass(InterRevenuePrimaryKey.class)
 public class InterRevenue {
 
     @Id
@@ -20,17 +18,19 @@ public class InterRevenue {
             name = "month",
             updatable = false
     )
-    private String month; // 月份（YYYYMM）
+    private String month; // 月份（YYYY-MM）
+    @Id
     @Column(
             name = "city",
             nullable = false
     )
     private String city; // 地域（省-市）
+    @Id
     @Column(
             name = "request_type",
             nullable = false
     )
-    private Integer requestType; // 请求类型
+    private String requestType; // 请求类型
     @Column(
             name = "success_cnt",
             nullable = false

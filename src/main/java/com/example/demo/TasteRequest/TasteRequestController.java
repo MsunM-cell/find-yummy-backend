@@ -68,12 +68,19 @@ public class TasteRequestController {
 
     @GetMapping
     public JSONObject getTasteRequests(@RequestParam(name = "user", required = false) Long userId,
-                                       @RequestParam(name = "city", required = false) String city) {
-        if (userId == null) {
-            return tasteRequestService.getTasteRequestsByCity(city);
+                                       @RequestParam(name = "city", required = false) String city,
+                                       @RequestParam(name = "name", required = false) String name,
+                                       @RequestParam(name = "page", required = false) Integer page) {
+        if (userId != null) {
+            return tasteRequestService.getTasteRequestsByUserId(userId, page);
+        } else if (city != null) {
+            return tasteRequestService.getTasteRequestsByCity(city, page);
+        } else if (name != null) {
+            return tasteRequestService.getTasteRequestsByFuzzyName(name, page);
         }
 
-        return tasteRequestService.getTasteRequestsByUserId(userId);
+        // 没有过滤器，返回所有请求信息
+        return tasteRequestService.getAllTasteRequests(page);
     }
 
     @GetMapping(path = "responses/{requestId}")
@@ -125,5 +132,10 @@ public class TasteRequestController {
         response.put("url", filePath);
 
         return response;
+    }
+
+    @GetMapping(path = "test")
+    public JSONObject getTest() {
+        return tasteRequestService.getTest();
     }
 }

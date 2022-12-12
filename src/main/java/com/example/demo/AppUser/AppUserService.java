@@ -8,6 +8,7 @@ import org.springframework.util.DigestUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -73,5 +74,9 @@ public class AppUserService {
 
     public AppUser getUserById(Long userId) {
         return appUserRepository.findAppUserById(userId).get();
+    }
+
+    public List<AppUser> getAllUsers() {
+        return appUserRepository.findAll();
     }
 }

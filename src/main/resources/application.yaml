@@ -1,4 +1,8 @@
 spring:
+  jackson:
+    serialization:
+      indent-output: true
+
   datasource:
     password:
     url: jdbc:postgresql://localhost:5432/find_yummy

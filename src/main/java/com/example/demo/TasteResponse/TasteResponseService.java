@@ -5,6 +5,7 @@ import com.example.demo.RequestsToResponses;
 import com.example.demo.TasteRequest.TasteRequest;
 import com.example.demo.TasteRequest.TasteRequestRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -76,8 +77,9 @@ public class TasteResponseService {
         return true;
     }
 
-    public JSONObject getTasteResponsesByUserId(Long userId) {
-        List<TasteResponse> tasteResponses = tasteResponseRepository.findTasteResponsesByResponseUserId(userId);
+    public JSONObject getTasteResponsesByUserId(Long userId, Integer page) {
+        PageRequest pageRequest = PageRequest.of(page, 5);
+        List<TasteResponse> tasteResponses = tasteResponseRepository.findTasteResponsesByResponseUserId(userId, pageRequest);
 
         JSONObject response = new JSONObject();
         response.put("code", 200);
