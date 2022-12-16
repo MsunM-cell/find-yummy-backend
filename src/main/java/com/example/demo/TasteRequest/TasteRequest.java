@@ -78,6 +78,11 @@ public class TasteRequest {
             nullable = false
     )
     private Integer state; // 状态（3已完成、0待响应、1已取消、2到期未达成）
+    @Column(
+            name = "city",
+            nullable = false
+    )
+    private String city; // 所在城市
 
     public TasteRequest(Long userId,
                         String tasteType,

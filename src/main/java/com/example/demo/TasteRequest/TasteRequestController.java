@@ -1,9 +1,10 @@
 package com.example.demo.TasteRequest;
 
 import com.alibaba.fastjson.JSONObject;
-import com.example.demo.RequestsToResponses;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -13,10 +14,14 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.UUID;
 
+@CrossOrigin
 @RestController
 @RequestMapping(path = "/requests")
 @AllArgsConstructor
 public class TasteRequestController {
+
+//    @Value("${file-save-path}")
+//    private String file_save_path;
 
     private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd/");
 
@@ -70,17 +75,22 @@ public class TasteRequestController {
     public JSONObject getTasteRequests(@RequestParam(name = "user", required = false) Long userId,
                                        @RequestParam(name = "city", required = false) String city,
                                        @RequestParam(name = "name", required = false) String name,
+                                       @RequestParam(name = "type", required = false) String type,
                                        @RequestParam(name = "page", required = false) Integer page) {
+        tasteRequestService.checkExpiredTasteRequests();
+
         if (userId != null) {
-            return tasteRequestService.getTasteRequestsByUserId(userId, page);
+            return tasteRequestService.getTasteRequestsByUserId(userId, page - 1);
         } else if (city != null) {
-            return tasteRequestService.getTasteRequestsByCity(city, page);
+            return tasteRequestService.getTasteRequestsByCity(city, page - 1);
         } else if (name != null) {
-            return tasteRequestService.getTasteRequestsByFuzzyName(name, page);
+            return tasteRequestService.getTasteRequestsByFuzzyName(name, page - 1);
+        } else if (type != null) {
+            return tasteRequestService.getTasteRequestsByType(type, page - 1);
         }
 
         // 没有过滤器，返回所有请求信息
-        return tasteRequestService.getAllTasteRequests(page);
+        return tasteRequestService.getAllTasteRequests(page - 1);
     }
 
     @GetMapping(path = "responses/{requestId}")
@@ -100,30 +110,28 @@ public class TasteRequestController {
     }
 
     @PostMapping("images")
-    public JSONObject uploadImages(MultipartFile image, HttpServletRequest req) {
-        String realPath =
-                req.getSession().getServletContext().getRealPath("/uploadFile/");
+    public JSONObject uploadImages(MultipartFile file, HttpServletRequest req) {
         String format = sdf.format(new Date());
-        File folder = new File(realPath + format);
+        File folder = new File("/Users/gutianyang/大四/上课/Web/find-yummy-backend/src/main/resources/static/uploadFile/" + format);
         String filePath = "";
         if (!folder.isDirectory()) {
             folder.mkdirs();
-            String oldName = image.getOriginalFilename();
-            assert oldName != null;
-            String newName = UUID.randomUUID().toString() +
-                    oldName.substring(oldName.lastIndexOf("."), oldName.length());
-            try {
-                image.transferTo(new File(folder, newName));
-                filePath = req.getScheme() + "://" + req.getServerName() + ":" +
-                        req.getServerPort() + "/uploadFile/" + format + newName;
+        }
 
-            } catch (IOException e) {
-                JSONObject response = new JSONObject();
-                response.put("code", -1);
-                response.put("msg", "上传失败");
+        String oldName = file.getOriginalFilename();
+        assert oldName != null;
+        String newName = UUID.randomUUID().toString() +
+                oldName.substring(oldName.lastIndexOf("."), oldName.length());
+        try {
+            file.transferTo(new File(folder, newName));
+            filePath = req.getScheme() + "://" + req.getServerName() + ":" +
+                    req.getServerPort() + "/uploadFile/" + format + newName;
+        } catch (IOException e) {
+            JSONObject response = new JSONObject();
+            response.put("code", -1);
+            response.put("msg", "上传失败");
 
-                return response;
-            }
+            return response;
         }
 
         JSONObject response = new JSONObject();
@@ -134,8 +142,18 @@ public class TasteRequestController {
         return response;
     }
 
+    @GetMapping(path = "{request_id}")
+    public JSONObject getTasteRequestById(@PathVariable("request_id") Long request_id) {
+        return tasteRequestService.getTasteRequestById(request_id);
+    }
+
     @GetMapping(path = "test")
     public JSONObject getTest() {
         return tasteRequestService.getTest();
+    }
+
+    @GetMapping(path = "type")
+    public JSONObject getTasteTypes() {
+        return tasteRequestService.getTasteTypes();
     }
 }

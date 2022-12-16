@@ -1,10 +1,10 @@
 package com.example.demo.TasteResponse;
 
 import com.alibaba.fastjson.JSONObject;
-import com.example.demo.RequestsToResponses;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+@CrossOrigin
 @RestController
 @RequestMapping(path = "/responses")
 @AllArgsConstructor
@@ -60,6 +60,6 @@ public class TasteResponseController {
     @GetMapping(path = "{userId}")
     public JSONObject getTasteResponsesByUserId(@PathVariable("userId") Long userId,
                                                 @RequestParam(name = "page") Integer page) {
-        return tasteResponseService.getTasteResponsesByUserId(userId, page);
+        return tasteResponseService.getTasteResponsesByUserId(userId, page - 1);
     }
 }

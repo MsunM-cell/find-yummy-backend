@@ -1,5 +1,6 @@
 package com.example.demo.TasteRequest;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.example.demo.AppUser.AppUser;
 import com.example.demo.AppUser.AppUserRepository;
@@ -35,6 +36,7 @@ public class TasteRequestService {
     private RequestsToResponses requestsToResponses;
 
     public Long addTasteRequest(JSONObject requestBody) {
+        System.out.println(requestBody.get("end_date"));
         TasteRequest tasteRequest = new TasteRequest(
                 Long.parseLong(requestBody.get("user").toString()),
                 requestBody.get("type").toString(),
@@ -47,6 +49,7 @@ public class TasteRequestService {
         tasteRequest.setCreateTime(LocalDateTime.now());
         tasteRequest.setModifyTime(LocalDateTime.now());
         tasteRequest.setState(0);
+        tasteRequest.setCity(appUserRepository.findAppUserById(Long.parseLong(requestBody.get("user").toString())).get().getCity());
         tasteRequestRepository.save(tasteRequest);
         return tasteRequest.getId();
     }
@@ -84,7 +87,7 @@ public class TasteRequestService {
     @Transactional
     public Boolean deleteTasteRequest(Long requestId) {
         TasteRequest tasteRequest = tasteRequestRepository.findTasteRequestById(requestId).get();
-        if(tasteRequest.getState() != 0) {
+        if (tasteRequest.getState() != 0) {
             return false;
         }
         tasteRequest.setState(2);
@@ -97,9 +100,19 @@ public class TasteRequestService {
         response.put("code", 200);
         response.put("msg", "success");
 
-        PageRequest pageRequest = PageRequest.of(page, 5);
+        PageRequest pageRequest = PageRequest.of(page, 8);
         List<TasteRequest> tasteRequestsByUserId = tasteRequestRepository.findTasteRequestsByUserId(userId, pageRequest);
+        response.put("total", tasteRequestRepository.findTasteRequestsByUserId(userId).size());
         response.put("taste_requests", tasteRequestsByUserId);
+
+//        JSONArray taste_requests = response.getJSONArray("taste_requests");
+//        for (int i = 0; i < taste_requests.size(); i++) {
+//            JSONObject taste_request = taste_requests.getJSONObject(i);
+//            Long user_id = taste_request.getLong("userId");
+//            String city = appUserRepository.findAppUserById(user_id).get().getCity();
+//            taste_request.put("city", city);
+//        }
+//        System.out.println(taste_requests);
 
         return response;
     }
@@ -108,25 +121,32 @@ public class TasteRequestService {
         List<AppUser> appUsers = appUserRepository.findAppUsersByCity(city);
         List<Long> userIds = appUsers.stream().map(AppUser::getId).toList();
 
-        PageRequest pageRequest = PageRequest.of(page, 5);
+        PageRequest pageRequest = PageRequest.of(page, 8);
         List<TasteRequest> tasteRequests = tasteRequestRepository.findTasteRequestsByUserIdIn(userIds, pageRequest);
 
         JSONObject response = new JSONObject();
         response.put("code", 200);
         response.put("msg", "success");
+        response.put("total", tasteRequestRepository.findTasteRequestsByUserIdIn(userIds).size());
         response.put("taste_requests", tasteRequests);
 
         return response;
     }
 
     public JSONObject getTasteRequestsResponses(Long requestId) {
-        Collection<Long> responseIds = requestsToResponses.getMap().get(requestId);
-        Collection<TasteResponse> tasteResponses = tasteResponseRepository.findAllById(responseIds);
-
         JSONObject response = new JSONObject();
-        response.put("code", 200);
-        response.put("msg", "success");
-        response.put("taste_responses", tasteResponses);
+
+        Collection<Long> responseIds = requestsToResponses.getMap().get(requestId);
+        if (responseIds == null) {
+            response.put("code", -1);
+            response.put("msg", "没有响应");
+        } else {
+            Collection<TasteResponse> tasteResponses = tasteResponseRepository.findAllById(responseIds);
+
+            response.put("code", 200);
+            response.put("msg", "success");
+            response.put("taste_responses", tasteResponses);
+        }
 
         return response;
     }
@@ -192,24 +212,26 @@ public class TasteRequestService {
     }
 
     public JSONObject getAllTasteRequests(Integer page) {
-        PageRequest pageRequest = PageRequest.of(page, 5);
+        PageRequest pageRequest = PageRequest.of(page, 8);
         List<TasteRequest> tasteRequests = tasteRequestRepository.findAll(pageRequest).getContent();
 
         JSONObject response = new JSONObject();
         response.put("code", 200);
         response.put("msg", "success");
+        response.put("total", tasteRequestRepository.findAll().size());
         response.put("taste_requests", tasteRequests);
 
         return response;
     }
 
     public JSONObject getTasteRequestsByFuzzyName(String name, Integer page) {
-        PageRequest pageRequest = PageRequest.of(page, 5);
+        PageRequest pageRequest = PageRequest.of(page, 8);
         List<TasteRequest> tasteRequests = tasteRequestRepository.findTasteRequestsByFuzzyName("%" + name + "%", pageRequest);
 
         JSONObject response = new JSONObject();
         response.put("code", 200);
         response.put("msg", "success");
+        response.put("total", tasteRequestRepository.findTasteRequestsByFuzzyName("%" + name + "%").size());
         response.put("taste_requests", tasteRequests);
 
         return response;
@@ -221,6 +243,54 @@ public class TasteRequestService {
 
         JSONObject response = new JSONObject();
         response.put("page", page.getContent());
+
+        return response;
+    }
+
+    public JSONObject getTasteRequestById(Long request_id) {
+        TasteRequest tasteRequest = tasteRequestRepository.findTasteRequestById(request_id).get();
+
+        JSONObject response = new JSONObject();
+        response.put("code", 200);
+        response.put("msg", "success");
+        response.put("info", tasteRequest);
+
+        return response;
+    }
+
+    public JSONObject getTasteRequestsByType(String type, Integer page) {
+        PageRequest pageRequest = PageRequest.of(page, 8);
+        List<TasteRequest> tasteRequests = tasteRequestRepository.findTasteRequestsByTasteType(type, pageRequest);
+
+        JSONObject response = new JSONObject();
+        response.put("code", 200);
+        response.put("msg", "success");
+        response.put("taste_requests", tasteRequests);
+        response.put("total", tasteRequestRepository.findTasteRequestsByTasteType(type).size());
+
+        return response;
+    }
+
+    @Transactional
+    public void checkExpiredTasteRequests() {
+        List<TasteRequest> tasteRequests = tasteRequestRepository.findAll();
+        for (int i = 0; i < tasteRequests.size(); i++) {
+            Integer state = tasteRequests.get(i).getState();
+            if (state == 0 || state == 1) {
+                LocalDate now = LocalDate.now();
+                LocalDate end = tasteRequests.get(i).getEndTime();
+                if (now.isAfter(end)) {
+                    tasteRequests.get(i).setState(3);
+                }
+            }
+        }
+    }
+
+    public JSONObject getTasteTypes() {
+        JSONObject response = new JSONObject();
+        response.put("code", 200);
+        response.put("msg", "success");
+        response.put("taste_types", tasteRequestRepository.findDistinctTasteType());
 
         return response;
     }

@@ -52,6 +52,7 @@ public class AppUserService {
 
         info.put("id", appUserOptional.get().getId());
         info.put("type", appUserOptional.get().getUserType());
+        info.put("city", appUserOptional.get().getCity());
 
         return info;
     }

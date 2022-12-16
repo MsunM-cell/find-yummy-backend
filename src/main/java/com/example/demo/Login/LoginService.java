@@ -30,6 +30,7 @@ public class LoginService {
             response.put("msg", "success");
             response.put("id", id);
             response.put("type", Integer.parseInt(info.getString("type")));
+            response.put("city", info.getString("city"));
         }
 
         return response;

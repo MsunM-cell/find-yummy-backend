@@ -14,9 +14,9 @@ public class UpdateService {
     public JSONObject updateAppUser(Long id, JSONObject requestBody) {
         appUserService.updateAppUser(
                 id,
-                requestBody.get("password").toString(),
-                requestBody.get("phone").toString(),
-                requestBody.get("detail").toString()
+                requestBody.getString("password"),
+                requestBody.getString("phone"),
+                requestBody.getString("detail")
         );
 
         JSONObject response = new JSONObject();

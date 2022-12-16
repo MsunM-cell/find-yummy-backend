@@ -84,6 +84,7 @@ public class TasteResponseService {
         JSONObject response = new JSONObject();
         response.put("code", 200);
         response.put("msg", "success");
+        response.put("total", tasteResponseRepository.findTasteResponsesByResponseUserId(userId).size());
         response.put("taste_responses", tasteResponses);
 
         return response;

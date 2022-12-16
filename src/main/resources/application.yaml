@@ -1,4 +1,11 @@
+file-save-path: /Users/gutianyang/大四/上课/Web/find-yummy-backend/src/main/resources/static/uploadFile/
 spring:
+#  web:
+#    resources:
+#      static-locations: classpath:/static/
+#  servlet:
+#    multipart:
+#      enabled: true
   jackson:
     serialization:
       indent-output: true
@@ -8,8 +15,8 @@ spring:
     url: jdbc:postgresql://localhost:5432/find_yummy
     username:
   jpa:
-    hibernate:
-      ddl-auto: create-drop
+#    hibernate:
+#      ddl-auto: create
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect

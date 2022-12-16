@@ -14,9 +14,20 @@ public interface TasteRequestRepository extends JpaRepository<TasteRequest, Long
 
     Optional<TasteRequest> findTasteRequestById(Long id);
 
+    List<TasteRequest> findTasteRequestsByUserId(Long userId);
     List<TasteRequest> findTasteRequestsByUserId(Long userId, PageRequest pageRequest);
+    List<TasteRequest> findTasteRequestsByUserIdIn(Collection<Long> userIds);
     List<TasteRequest> findTasteRequestsByUserIdIn(Collection<Long> userIds, PageRequest pageRequest);
 
     @Query("select tr from TasteRequest tr where tr.name like ?1")
     List<TasteRequest> findTasteRequestsByFuzzyName(String name, PageRequest pageRequest);
+
+    @Query("select tr from TasteRequest tr where tr.name like ?1")
+    List<TasteRequest> findTasteRequestsByFuzzyName(String name);
+
+    List<TasteRequest> findTasteRequestsByTasteType(String type);
+    List<TasteRequest> findTasteRequestsByTasteType(String type, PageRequest pageRequest);
+
+    @Query("select distinct tr.tasteType from TasteRequest tr")
+    List<String> findDistinctTasteType();
 }

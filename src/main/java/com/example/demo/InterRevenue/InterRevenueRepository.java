@@ -14,4 +14,7 @@ public interface InterRevenueRepository extends JpaRepository<InterRevenue, Inte
 
     @Query("select ir from InterRevenue ir where ir.city = ?3 and ir.month between ?1 and ?2")
     List<InterRevenue> findInterRevenuesByStartAndStopAndCity(String start, String stop, String city);
+
+    @Query("select ir from InterRevenue ir where ir.month between ?1 and ?2")
+    List<InterRevenue> findInterRevenuesByStartAndStop(String start, String stop);
 }
