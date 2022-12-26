@@ -9,6 +9,7 @@ import java.util.List;
 @Repository
 public interface TasteResponseRepository extends JpaRepository<TasteResponse, Long> {
 
+    List<TasteResponse> findTasteResponsesByRequestId(Long requestId);
     List<TasteResponse> findTasteResponsesByResponseUserId(Long userId);
     List<TasteResponse> findTasteResponsesByResponseUserId(Long userId, PageRequest pageRequest);
 }

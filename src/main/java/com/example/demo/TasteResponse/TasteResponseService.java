@@ -78,7 +78,7 @@ public class TasteResponseService {
     }
 
     public JSONObject getTasteResponsesByUserId(Long userId, Integer page) {
-        PageRequest pageRequest = PageRequest.of(page, 5);
+        PageRequest pageRequest = PageRequest.of(page, 8);
         List<TasteResponse> tasteResponses = tasteResponseRepository.findTasteResponsesByResponseUserId(userId, pageRequest);
 
         JSONObject response = new JSONObject();

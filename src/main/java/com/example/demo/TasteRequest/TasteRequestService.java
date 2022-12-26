@@ -136,13 +136,11 @@ public class TasteRequestService {
     public JSONObject getTasteRequestsResponses(Long requestId) {
         JSONObject response = new JSONObject();
 
-        Collection<Long> responseIds = requestsToResponses.getMap().get(requestId);
-        if (responseIds == null) {
+        List<TasteResponse> tasteResponses = tasteResponseRepository.findTasteResponsesByRequestId(requestId);
+        if (tasteResponses.size() == 0) {
             response.put("code", -1);
             response.put("msg", "没有响应");
         } else {
-            Collection<TasteResponse> tasteResponses = tasteResponseRepository.findAllById(responseIds);
-
             response.put("code", 200);
             response.put("msg", "success");
             response.put("taste_responses", tasteResponses);
